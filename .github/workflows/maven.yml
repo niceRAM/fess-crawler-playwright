@@ -52,7 +52,7 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: package
-        path: .
+        path: packages/artifact.jar
 
     - name: Create Release
       id: create_release
@@ -73,6 +73,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path:  .
+        asset_path:  packages/artifact.jar
         asset_name:  ${{ github.ref_name }}.jar
         asset_content_type: application/java-archive
