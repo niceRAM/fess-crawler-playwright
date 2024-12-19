@@ -85,7 +85,7 @@ jobs:
 
     - name: Echo download path && Display structure of downloaded files
       run: echo ${{steps.download.outputs.download-path}} && ls -lashCR
-      working-directory: ${{steps.download.outputs.download-path}}
+      #working-directory: ${{steps.download.outputs.download-path}}
       
     - name: Create Release
       id: create_release
@@ -96,7 +96,7 @@ jobs:
         tag_name: ${{ github.ref_name }}
         release_name: Release ${{ github.ref_name }}
         body: |
-          自动生成 Release!
+          Auto Release!
         draft: false
         prerelease: true
 
@@ -106,6 +106,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path:  ${{steps.download.outputs.download-path}}
+        asset_path:  ${{steps.download.outputs.download-path}}/${{ github.ref_name }}.jar
         asset_name:  ${{ github.ref_name }}.jar
         asset_content_type: application/java-archive
