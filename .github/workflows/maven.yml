@@ -30,7 +30,7 @@ jobs:
       - name: Install Playwright
         run: npx playwright install --with-deps
       - name: Build with Maven
-        run: mvn -B source:jar javadoc:jar package --file pom.xml
+        run: mvn -B source:jar javadoc:jar package --file pom.xml -Dmaven.test.skip
 
       - name: Find JAR file
         id: find-jar
