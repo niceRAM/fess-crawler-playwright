@@ -31,7 +31,7 @@ jobs:
         run: mvn -B source:jar javadoc:jar package --file pom.xml -Dmaven.test.skip
 
       - name: Find JAR file
-        id: find-jar
+        id: find_jar
         run: |
             JAR_FILE=$(find target -name "*.jar" -not -name "*-sources.jar" -not -name "*-javadoc.jar")
             echo "::set-output name=jar_path::$JAR_FILE"
@@ -40,7 +40,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: package
-          path: ${{ steps.find-jar.outputs.jar_path }}
+          path: ${{ steps.find_jar.outputs.jar_path }}
           
   release:
     needs: build
@@ -71,6 +71,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path:  package/*
-        asset_name: ${{ github.ref_name }}-${{ github.run_number }}.jar
+        asset_path:  ${{ steps.find_jar.outputs.jar_path }} # 修改 asset_path 为 JAR 文件路径
+        asset_name:  ${{ github.ref_name }}.jar
         asset_content_type: application/java-archive
