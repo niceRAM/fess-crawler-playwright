@@ -36,76 +36,10 @@ jobs:
             JAR_FILE=$(find target -name "*.jar" -not -name "*-sources.jar" -not -name "*-javadoc.jar")
             echo "::set-output name=jar_path::$JAR_FILE"
         
-      - name: Upload JAR Artifact
-        uses: actions/upload-artifact@v3
+      - name: Upload to release
+        uses: JasonEtco/upload-to-release@master
         with:
-          name: package
-          path: ${{ steps.find_jar.outputs.jar_path }}
-          
-  release:
-    needs: build
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/') && contains(github.ref_name, 'custom')
-    runs-on: ubuntu-latest
+          args: ${{ steps.find_jar.outputs.jar_path }} application/java-archive
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     
-    steps:
-    - name: Check and Delete Existing Tag
-      id: check-tag
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        TAG_NAME="${{ github.ref_name }}"
-        
-        # Get existing tags
-        TAGS=$(gh api /repos/${{ github.repository }}/tags --jq '.[].name' || true)
-
-        if [[ $TAGS =~ "$TAG_NAME" ]]; then
-          echo "Tag '$TAG_NAME' already exists."
-
-          # Get existing release
-          RELEASE_ID=$(gh api /repos/${{ github.repository }}/releases --jq ".[] | select(.tag_name == \"$TAG_NAME\") | .id" || true)
-
-           # Delete existing release if any
-          if [[ -n "$RELEASE_ID" ]]; then
-            echo "Deleting existing release with ID: $RELEASE_ID"
-            gh api -X DELETE "/repos/${{ github.repository }}/releases/$RELEASE_ID"
-          fi
-          
-          # Delete existing tag
-          echo "Deleting existing tag: $TAG_NAME"
-          gh api -X DELETE "/repos/${{ github.repository }}/git/refs/tags/$TAG_NAME"
-        else
-          echo "Tag '$TAG_NAME' does not exist. Proceeding to create new release."
-        fi
-
-    - name: Download JAR Artifact
-      id: download
-      uses: actions/download-artifact@v3
-      with:
-        name: package
-
-    - name: Echo download path && Display structure of downloaded files
-      run: echo ${{steps.download.outputs.download-path}} && ls -lashCR
-      #working-directory: ${{steps.download.outputs.download-path}}
-      
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref_name }}
-        release_name: Release ${{ github.ref_name }}
-        body: |
-          Auto Release!
-        draft: false
-        prerelease: true
-
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path:  ./${{ github.ref_name }}.jar
-        asset_name:  ${{ github.ref_name }}.jar
-        asset_content_type: application/java-archive
