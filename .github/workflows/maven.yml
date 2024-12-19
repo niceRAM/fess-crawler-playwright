@@ -3,12 +3,12 @@ name: Java CI with Maven
 on:
   push:
     branches:
-      - "*-custom-*"
+      - "*custom*"
     tags:
       - "custom*" # 触发 release 的 tag
   pull_request:
     branches:
-      - "*-custom-*"
+      - "*custom*"
 
 jobs:
   build:
@@ -74,5 +74,5 @@ jobs:
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path:  ${{ github.workspace }}/package/*
-        asset_name:  ${{ github.event.ref_name }}.jar
+        asset_name:  ${{ github.ref_name }}.jar
         asset_content_type: application/java-archive
