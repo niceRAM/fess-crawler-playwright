@@ -82,9 +82,10 @@ jobs:
       uses: actions/download-artifact@v3
       with:
         name: package
-        
-    - name: 'Echo download path'
-      run: echo ${{steps.download.outputs.download-path}}
+
+    - name: Echo download path && Display structure of downloaded files
+      run: echo ${{steps.download.outputs.download-path}} && ls -lashCR
+      working-directory: ${{steps.download.outputs.download-path}}
       
     - name: Create Release
       id: create_release
